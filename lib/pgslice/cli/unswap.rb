@@ -19,6 +19,11 @@ module PgSlice
         queries << "ALTER SEQUENCE #{quote_ident(sequence["sequence_schema"])}.#{quote_ident(sequence["sequence_name"])} OWNED BY #{quote_table(table)}.#{quote_ident(sequence["related_column"])};"
       end
 
+      table.dependences.each do |dependency|
+        queries << "ALTER TABLE #{dependency['table_name']} DROP CONSTRAINT #{dependency['foreign_key_name']};"
+        queries << "ALTER TABLE ONLY #{dependency['table_name']} ADD CONSTRAINT #{dependency['foreign_key_name']} FOREIGN KEY (#{dependency['column_name']}) REFERENCES #{table.name}(id);"
+      end
+
       run_queries(queries)
     end
   end

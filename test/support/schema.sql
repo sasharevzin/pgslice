@@ -16,6 +16,17 @@ CREATE TABLE "Posts" (
   CONSTRAINT "foreign_key_1" FOREIGN KEY ("UserId") REFERENCES "Users"("Id")
 );
 
-CREATE INDEX ON "Posts" ("createdAt");
+CREATE TABLE "Comments" (
+  "Id" SERIAL PRIMARY KEY,
+  "PostId" INTEGER,
+  "createdAt" timestamp,
+  "createdAtTz" timestamptz,
+  "createdOn" date,
+  CONSTRAINT "foreign_key_2" FOREIGN KEY ("PostId") REFERENCES "Posts"("Id")
+);
 
-INSERT INTO "Posts" ("createdAt", "createdAtTz", "createdOn") SELECT NOW(), NOW(), NOW() FROM generate_series(1, 10000) n;
+CREATE INDEX ON "Posts" ("createdAt");
+CREATE INDEX ON "Comments" ("createdAt");
+
+INSERT INTO "Posts" ("createdAt", "createdAtTz", "createdOn") SELECT NOW(), NOW(), NOW() FROM generate_series(1, 1000) n;
+INSERT INTO "Comments" ("PostId", "createdAt", "createdAtTz", "createdOn") SELECT "Id", "createdAt", "createdAtTz", "createdOn" from Posts

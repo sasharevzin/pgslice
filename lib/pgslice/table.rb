@@ -44,6 +44,21 @@ module PgSlice
       execute("SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conrelid = #{regclass} AND contype ='f'").map { |r| r["pg_get_constraintdef"] }
     end
 
+    def dependences
+      execute("SELECT
+                conname AS foreign_key_name,
+                conrelid::regclass AS table_name,
+                a.attname AS column_name,
+                pg_get_constraintdef(c.oid) AS constraint_definition
+              FROM
+                pg_constraint c
+                JOIN pg_attribute a ON a.attnum = ANY (conkey)
+                  AND a.attrelid = conrelid
+              WHERE
+                confrelid = #{regclass}
+                AND contype = 'f'")
+    end
+
     # https://stackoverflow.com/a/20537829
     # TODO can simplify with array_position in Postgres 9.5+
     def primary_key
